@@ -55,14 +55,14 @@ def add_book_menu():
     print("\n================================= Library UMS ================================\n")
     print("1. Start to add book")
     print("2. Back to Admin Menu")
-    print("3. Exit")
+    print("3. Logout")
 
 
 def remove_book_menu():
     print("\n================================= Library UMS ================================\n")
     print("1. Remove a Book")
     print("2. Back to Admin Menu")
-    print("3. Exit")
+    print("3. Logout")
 
 
 def display_book_list_menu():
@@ -79,25 +79,66 @@ def show_author_db():
     query = ("SELECT * FROM author")
 
     cursor.execute(query)
+    print("\n========== Author List ==========")
     for (id_author, author_name) in cursor:
         print(f"{id_author}. {author_name}")
+    print()
     cursor.close()
     data.close()
 
 
-def author_filter(user_input):
-    if user_input == "01":
-        return "01"
-    elif user_input == "02":
-        return "02"
-    elif user_input == "03":
-        return "03"
-    elif user_input == "04":
-        return "04"
-    elif user_input == "05":
-        return "05"
-    else:
-        return None
+def show_author_book(user_input):
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT book.book_id, book.book_title "
+             "FROM book "
+             "LEFT JOIN author_write_book ON book.book_id = author_write_book.book_id "
+             f"WHERE author_id = '{user_input}'")
+
+    cursor.execute(query)
+
+    print("\n======= Book list by Author =======")
+    for (book_id, book_title) in cursor:
+        print(f"{book_id}. {book_title}")
+    print()
+
+    cursor.close()
+    data.close()
+
+
+def remove_book(user_input):
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = (f"DELETE FROM book WHERE book_id = '{user_input}'")
+
+    cursor.execute(query)
+
+    data.commit()
+    cursor.close()
+    data.close()
+
+    print("\n========== Book removed successfully ==========")
+
+
+def show_all_book():
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT author_name, book.book_id, book_title "
+             "FROM book "
+             "JOIN author_write_book ON book.book_id = author_write_book.book_id "
+             "JOIN author ON author_write_book.author_id = author.author_id ")
+
+    cursor.execute(query)
+
+    print("\n========= Full Book list =========")
+    for (author_name, book_id, book_title) in cursor:
+        print(f"{book_id}. {book_title} || by {author_name}")
+
+    cursor.close()
+    data.close()
 
 
 # Main Program
@@ -129,10 +170,8 @@ while run_program:
                 if add_book_input == "1":
                     new_book_id = input("Enter book id: ")
                     new_book_title = input("Enter book title: ")
-                    print("\n========== Author List ==========")
                     show_author_db()
-                    print()
-                    new_book_author = author_filter(input("Enter book author: "))
+                    new_book_author = input("Enter book's author: ")
                     data = mysql.connector.connect(user='root', database='library_team')
                     cursor = data.cursor()
 
@@ -149,14 +188,40 @@ while run_program:
                     cursor.close()
                     data.close()
 
-                    print("Book added successfully")
+                    print("\n========== Book added successfully ==========")
 
+                elif add_book_input == "2":
+                    print("\n============= Add book Canceled =============")
 
+                elif add_book_input == "3":
+                    print("Logging out...")
+                    run_admin = False
 
             elif admin_input == "2":
                 print("Remove a Book")
+
+                remove_book_menu()
+
+                remove_book_input = input("Enter your choice: ")
+
+                if remove_book_input == "1":
+                    show_author_db()
+                    remove_author_book = input("Which author you wish to remove the book from: ")
+                    show_author_book(remove_author_book)
+
+                    remove_book_id = input("Which book from chosen author you wish to remove: ")
+                    remove_book(remove_book_id)
+
+                elif remove_book_input == "2":
+                    print("\n=========== Remove book Canceled ============")
+
+                elif remove_book_input == "3":
+                    print("Logging out...")
+                    run_admin = False
+
             elif admin_input == "3":
-                print("Display Book List")
+                show_all_book()
+
             elif admin_input == "4":
                 print("Logging out...")
                 run_admin = False
