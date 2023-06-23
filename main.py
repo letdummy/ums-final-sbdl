@@ -53,7 +53,7 @@ def display_borrowed_book_menu():
 # admin
 def add_book_menu():
     print("\n================================= Library UMS ================================\n")
-    print("1. Add a Book")
+    print("1. Start to add book")
     print("2. Back to Admin Menu")
     print("3. Exit")
 
@@ -80,22 +80,22 @@ def show_author_db():
 
     cursor.execute(query)
     for (id_author, author_name) in cursor:
-        print("id_author: {}, author_name: {}".format(id_author, author_name))
+        print(f"{id_author}. {author_name}")
     cursor.close()
     data.close()
 
 
 def author_filter(user_input):
-    if user_input == "1":
-        return "Agus Ardi"
-    elif user_input == "2":
-        return "Hussain Abdillah"
-    elif user_input == "3":
-        return "Arwinda"
-    elif user_input == "4":
-        return "Mirashanti"
-    elif user_input == "5":
-        return "Fajar Suryawan"
+    if user_input == "01":
+        return "01"
+    elif user_input == "02":
+        return "02"
+    elif user_input == "03":
+        return "03"
+    elif user_input == "04":
+        return "04"
+    elif user_input == "05":
+        return "05"
     else:
         return None
 
@@ -122,7 +122,6 @@ while run_program:
             admin_input = input("Enter your choice: ")
 
             if admin_input == "1":
-                print("Add a Book")
                 add_book_menu()
 
                 add_book_input = input("Enter your choice: ")
@@ -130,20 +129,23 @@ while run_program:
                 if add_book_input == "1":
                     new_book_id = input("Enter book id: ")
                     new_book_title = input("Enter book title: ")
+                    print("\n========== Author List ==========")
                     show_author_db()
+                    print()
                     new_book_author = author_filter(input("Enter book author: "))
                     data = mysql.connector.connect(user='root', database='library_team')
                     cursor = data.cursor()
 
-                    query = (f"INSERT INTO book (book_id, book_title) VALUES ({new_book_id}, {new_book_title})")
+                    query = (f"INSERT INTO book (book_id, book_title) VALUES ('{new_book_id}', '{new_book_title}')")
 
                     cursor.execute(query)
 
                     query2 = (
-                        f"INSERT INTO author_write_book (book_id, author_id) VALUES ({new_book_id}, {new_book_author})")
+                        f"INSERT INTO author_write_book (book_id, author_id) VALUES ('{new_book_id}', '{new_book_author}')")
 
                     cursor.execute(query2)
 
+                    data.commit()
                     cursor.close()
                     data.close()
 
