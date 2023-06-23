@@ -21,7 +21,7 @@ def login_admin_menu():
     print("1. Add a Book")
     print("2. Remove a Book")
     print("3. Display Book List")
-    print("4. Exit")
+    print("4. Logout")
 
 
 # member
@@ -70,23 +70,40 @@ def display_book_list_menu():
 
 # Main Program
 run_program = True
-
+run_admin = True
 
 while run_program:
     main_menu()
 
     main_input = input("Enter your choice: ")
 
+    # member login logic
     if main_input == "1":
         print("Login as Member")
 
+    # admin login logic
     elif main_input == "2":
-        print("Login as Admin")
+        while run_admin:
+            login_admin_menu()
 
+            admin_input = input("Enter your choice: ")
+
+            if admin_input == "1":
+                print("Add a Book")
+            elif admin_input == "2":
+                print("Remove a Book")
+            elif admin_input == "3":
+                print("Display Book List")
+            elif admin_input == "4":
+                print("Logging out...")
+                run_admin = False
+
+    # exit logic
     elif main_input == "3":
         print("Exiting program...")
         run_program = False
 
+    # invalid input logic
     else:
         print("Invalid Input, exiting program...")
         run_program = False
