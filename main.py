@@ -150,6 +150,7 @@ while run_program:
     main_menu()
 
     main_input = input("Enter your choice: ")
+    run_admin = True
 
     # member login logic
     if main_input == "1":
