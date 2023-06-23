@@ -1,3 +1,7 @@
+# import
+import mysql.connector
+
+
 # mainMenu
 def main_menu():
     print("\n================================= Library UMS ================================\n")
@@ -68,9 +72,38 @@ def display_book_list_menu():
     print("3. Exit")
 
 
+def show_author_db():
+    data = mysql.connector.connect(user='root', database='library_team')
+    cursor = data.cursor()
+
+    query = ("SELECT * FROM author")
+
+    cursor.execute(query)
+    for (id_author, author_name) in cursor:
+        print("id_author: {}, author_name: {}".format(id_author, author_name))
+    cursor.close()
+    data.close()
+
+
+def author_filter(user_input):
+    if user_input == "1":
+        return "Agus Ardi"
+    elif user_input == "2":
+        return "Hussain Abdillah"
+    elif user_input == "3":
+        return "Arwinda"
+    elif user_input == "4":
+        return "Mirashanti"
+    elif user_input == "5":
+        return "Fajar Suryawan"
+    else:
+        return None
+
+
 # Main Program
 run_program = True
 run_admin = True
+run_add_book = True
 
 while run_program:
     main_menu()
@@ -90,6 +123,34 @@ while run_program:
 
             if admin_input == "1":
                 print("Add a Book")
+                add_book_menu()
+
+                add_book_input = input("Enter your choice: ")
+
+                if add_book_input == "1":
+                    new_book_id = input("Enter book id: ")
+                    new_book_title = input("Enter book title: ")
+                    show_author_db()
+                    new_book_author = author_filter(input("Enter book author: "))
+                    data = mysql.connector.connect(user='root', database='library_team')
+                    cursor = data.cursor()
+
+                    query = (f"INSERT INTO book (book_id, book_title) VALUES ({new_book_id}, {new_book_title})")
+
+                    cursor.execute(query)
+
+                    query2 = (
+                        f"INSERT INTO author_write_book (book_id, author_id) VALUES ({new_book_id}, {new_book_author})")
+
+                    cursor.execute(query2)
+
+                    cursor.close()
+                    data.close()
+
+                    print("Book added successfully")
+
+
+
             elif admin_input == "2":
                 print("Remove a Book")
             elif admin_input == "3":
