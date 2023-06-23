@@ -3,7 +3,7 @@ def main_menu():
     print("\n================================= Library UMS ================================\n")
     print("1. Login as Member")
     print("2. Login as Admin")
-    print("2. Exit")
+    print("3. Exit")
 
 
 # member menu
@@ -69,4 +69,24 @@ def display_book_list_menu():
 
 
 # Main Program
+run_program = True
 
+
+while run_program:
+    main_menu()
+
+    main_input = input("Enter your choice: ")
+
+    if main_input == "1":
+        print("Login as Member")
+
+    elif main_input == "2":
+        print("Login as Admin")
+
+    elif main_input == "3":
+        print("Exiting program...")
+        run_program = False
+
+    else:
+        print("Invalid Input, exiting program...")
+        run_program = False
