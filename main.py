@@ -12,7 +12,6 @@ def main_menu():
 
 
 # member menu
-
 def login_member():
     print("\n================================= Library UMS ================================\n")
     if login_member_id == "01":
@@ -92,7 +91,28 @@ def display_book_list_menu():
     print("2. Back to Admin Menu")
     print("3. Exit")
 
+# feature member
+def show_borrowed_book(user_input):
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
 
+    query = ("SELECT book.book_id, book.book_title "
+             "FROM book "
+             "LEFT JOIN loan ON book.book_id = loan.book_id "
+             f"WHERE member_id = '{user_input}'")
+
+    cursor.execute(query)
+
+    print("\n======= Borrowed Book list by Member =======")
+    for (book_id, book_title) in cursor:
+        print(f"{book_id}. {book_title}")
+    print()
+
+    cursor.close()
+    data.close()
+
+
+# feature admin
 def show_author_db():
     data = mysql.connector.connect(user='root', database='library_team')
     cursor = data.cursor()
@@ -210,6 +230,25 @@ while run_program:
                     print("\n========== Book borrowed successfully ==========")
                 elif borrow_book_input == "2":
                     login_member_menu()
+
+            elif member_input == "2":
+                return_book_menu()
+                return_book_input = input("Enter your choice: ")
+
+                # if return_book_input == "1":
+                #     show borrowed book : bikin query yang menampilkan buku yang dipinjam oleh member
+                #     return_book_id = input("Enter book id: ")
+
+            elif member_input == "3":
+                show_borrowed_book(login_member_id)
+
+            elif member_input == "4":
+                run_member = False
+
+
+
+
+
 
 
 
