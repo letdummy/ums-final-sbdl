@@ -39,8 +39,13 @@
 1. Clone this repository to your local machine or download the source code.
 2. Open a terminal/command prompt and navigate to the project directory.
 3. Run the following command to start the application:
-4. Follow the on-screen instructions to navigate through the menu and use the available options.
 
+   ```bash
+   python main.py
+   ``` 
+5. Follow the on-screen instructions to navigate through the menu and use the available options.
+
+<br>
 Enjoy managing books and user accounts in a library with ease using this interactive CLI application, Library UMS!
   
 ## 🏷️ Requirements
