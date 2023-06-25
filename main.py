@@ -39,6 +39,8 @@ def filter_input_author(user_input):
         return "04"
     elif user_input == "5" or user_input == "05":
         return "05"
+    elif user_input == "99":
+        return "99"
     else:
         raise ValueError("Invalid input: Please input a number between 1-5")
 
@@ -394,6 +396,7 @@ while run_program:
 
     # admin login logic
     elif main_input == "2":
+        run_admin = True
         while run_admin:
             login_admin_menu()
 
