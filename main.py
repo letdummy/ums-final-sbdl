@@ -1,5 +1,6 @@
 # import
 import mysql.connector
+import datetime
 
 
 # mainMenu
@@ -10,13 +11,45 @@ def main_menu():
     print("3. Exit")
 
 
+def show_all_member():
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT member_id, member_name FROM member")
+
+    cursor.execute(query)
+
+    print("\n========= Member List =========")
+    for (member_id, member_name) in cursor:
+        print(f"{member_id}. {member_name}")
+    print("\n99. Back to Main Menu")
+    cursor.close()
+    data.close()
+
+
 # member menu
+def login_member(user_input):
+    print("\n================================= Library UMS ================================\n")
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = (f"SELECT member_name FROM member WHERE  member_id = {user_input}")
+
+    cursor.execute(query)
+
+    for (member_name) in cursor:
+        return(member_name[0])
+
+    cursor.close()
+    data.close()
+
+
 def login_member_menu():
     print("\n================================= Library UMS ================================\n")
     print("1. Borrow a Book")
     print("2. Return a Book")
     print("3. Display Borrowed Book")
-    print("4. Exit")
+    print("4. Logout")
 
 
 # admin menu
@@ -31,9 +64,9 @@ def login_admin_menu():
 # member
 def borrow_book_menu():
     print("\n================================= Library UMS ================================\n")
-    print("1. Borrow a Book")
+    print("1. Start borrow a Book")
     print("2. Back to Member Menu")
-    print("3. Exit")
+    print("3. Logout")
 
 
 def return_book_menu():
@@ -72,6 +105,27 @@ def display_book_list_menu():
     print("3. Exit")
 
 
+# feature member
+def show_borrowed_book(user_input):
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT book.book_id, book.book_title "
+             "FROM book "
+             "LEFT JOIN loan ON book.book_id = loan.book_id "
+             f"WHERE member_id = '{user_input}'")
+
+    cursor.execute(query)
+
+    print(f"\n======= Borrowed Book list by {login_member(login_member_id)} =======")
+    for (book_id, book_title) in cursor:
+        print(f"{book_id}. {book_title}")
+
+    cursor.close()
+    data.close()
+
+
+# feature admin
 def show_author_db():
     data = mysql.connector.connect(user='root', database='library_team')
     cursor = data.cursor()
@@ -122,14 +176,20 @@ def remove_book(user_input):
     print("\n========== Book removed successfully ==========")
 
 
-def show_all_book():
+def show_all_book(user_input):
     data = mysql.connector.connect(user="root", database="library_team")
     cursor = data.cursor()
 
     query = ("SELECT author_name, book.book_id, book_title "
              "FROM book "
              "JOIN author_write_book ON book.book_id = author_write_book.book_id "
-             "JOIN author ON author_write_book.author_id = author.author_id ")
+             "JOIN author ON author_write_book.author_id = author.author_id "
+             "WHERE book.book_id NOT IN ("
+             "    SELECT loan.book_id "
+             "    FROM loan "
+             f"    WHERE loan.member_id = {user_input}"
+             ") "
+             "ORDER BY book.book_id")
 
     cursor.execute(query)
 
@@ -146,14 +206,101 @@ run_program = True
 run_admin = True
 run_add_book = True
 
+run_member = True
+run_borrow_book = True
+
 while run_program:
     main_menu()
 
     main_input = input("Enter your choice: ")
+    run_admin = True
+    run_member = True
 
     # member login logic
     if main_input == "1":
-        print("Login as Member")
+        show_all_member()
+        print()
+        login_member_id = input("Enter your ID: ")
+        if login_member_id == "99":
+            print("You are now in main menu")
+            run_member = False
+        else:
+            print("Welcome to Library UMS,", login_member(login_member_id))
+            run_member = True
+
+        while run_member:
+            login_member_menu()
+            print()
+            member_input = input("Enter your choice: ")
+
+            # borrow a book logic
+            if member_input == "1":
+                while run_borrow_book:
+                    borrow_book_menu()
+                    borrow_book_input = input("Enter your choice: ")
+
+                    if borrow_book_input == "1":
+                        show_all_book(login_member_id)
+                        print("\n========== Borrow a Book ==========")
+
+                        borrow_book_id = input("Enter book ID: ")
+                        date_now = datetime.datetime.now()
+                        date_book_borrowed = date_now.strftime("%Y-%m-%d")
+                        due_date = datetime.datetime.strptime(date_book_borrowed, "%Y-%m-%d") + datetime.timedelta(
+                            days=7)
+                        due_return_date = due_date.strftime("%Y-%m-%d")
+
+                        data = mysql.connector.connect(user='root', database='library_team')
+                        cursor = data.cursor()
+
+                        query = (f"INSERT INTO loan (book_id, member_id, loan_date, due_return_date) "
+                                 f"VALUES ('{borrow_book_id}', '{login_member_id}', '{date_book_borrowed}', '{due_return_date}')")
+                        cursor.execute(query)
+
+                        data.commit()
+                        cursor.close()
+                        data.close()
+
+                        print("\n========== Book borrowed successfully ==========")
+                        print(f"========== Due return date: {due_return_date} =========")
+
+                    elif borrow_book_input == "2":
+                        print("\n=========== Borrow book Canceled ============")
+                        run_borrow_book = False
+
+                    elif borrow_book_input == "3":
+                        print("Logging out...")
+                        run_member = False
+
+            elif member_input == "2":
+                return_book_menu()
+                return_book_input = input("Enter your choice: ")
+
+                # if return_book_input == "1":
+                #     show borrowed book : bikin query yang menampilkan buku yang dipinjam oleh member
+                #     return_book_id = input("Enter book id: ")
+
+            elif member_input == "3":
+                show_borrowed_book(login_member_id)
+
+            elif member_input == "4":
+                print("Logging out...")
+                run_member = False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     # admin login logic
     elif main_input == "2":
