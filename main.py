@@ -73,7 +73,7 @@ def return_book_menu():
     print("\n================================= Library UMS ================================\n")
     print("1. Return a Book")
     print("2. Back to Member Menu")
-    print("3. Exit")
+    print("3. Logout")
 
 
 def display_borrowed_book_menu():
@@ -113,7 +113,7 @@ def show_borrowed_book(user_input):
     query = ("SELECT book.book_id, book.book_title "
              "FROM book "
              "LEFT JOIN loan ON book.book_id = loan.book_id "
-             f"WHERE member_id = '{user_input}'")
+             f"WHERE member_id = '{user_input}' AND return_date IS NULL ORDER BY book_id")
 
     cursor.execute(query)
 
@@ -176,7 +176,7 @@ def remove_book(user_input):
     print("\n========== Book removed successfully ==========")
 
 
-def show_all_book(user_input):
+def show_all_book(user_input=0):
     data = mysql.connector.connect(user="root", database="library_team")
     cursor = data.cursor()
 
@@ -200,21 +200,39 @@ def show_all_book(user_input):
     cursor.close()
     data.close()
 
+def get_due_return(member_id, book_id):
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT due_return_date "
+             "FROM loan "
+             f"WHERE member_id = '{member_id}' AND book_id = '{book_id}'")
+
+    cursor.execute(query)
+
+    for (due_return_date) in cursor:
+        return (due_return_date[0])
+
+    cursor.close()
+    data.close()
+
+
+
 
 # Main Program
 run_program = True
+
 run_admin = True
 run_add_book = True
 
 run_member = True
 run_borrow_book = True
+run_return_book = True
 
 while run_program:
     main_menu()
 
     main_input = input("Enter your choice: ")
-    run_admin = True
-    run_member = True
 
     # member login logic
     if main_input == "1":
@@ -235,20 +253,20 @@ while run_program:
 
             # borrow a book logic
             if member_input == "1":
+                run_borrow_book = True
                 while run_borrow_book:
                     borrow_book_menu()
                     borrow_book_input = input("Enter your choice: ")
 
                     if borrow_book_input == "1":
+                        run_borrow_book = True
                         show_all_book(login_member_id)
                         print("\n========== Borrow a Book ==========")
 
                         borrow_book_id = input("Enter book ID: ")
-                        date_now = datetime.datetime.now()
-                        date_book_borrowed = date_now.strftime("%Y-%m-%d")
-                        due_date = datetime.datetime.strptime(date_book_borrowed, "%Y-%m-%d") + datetime.timedelta(
-                            days=7)
-                        due_return_date = due_date.strftime("%Y-%m-%d")
+
+                        date_book_borrowed = datetime.datetime.now().strftime("%Y-%m-%d")
+                        due_return_date = (datetime.datetime.now() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
 
                         data = mysql.connector.connect(user='root', database='library_team')
                         cursor = data.cursor()
@@ -270,37 +288,69 @@ while run_program:
 
                     elif borrow_book_input == "3":
                         print("Logging out...")
+                        run_borrow_book = False
                         run_member = False
 
             elif member_input == "2":
-                return_book_menu()
-                return_book_input = input("Enter your choice: ")
+                run_return_book = True
+                while run_return_book:
+                    return_book_menu()
+                    return_book_input = input("Enter your choice: ")
 
-                # if return_book_input == "1":
-                #     show borrowed book : bikin query yang menampilkan buku yang dipinjam oleh member
-                #     return_book_id = input("Enter book id: ")
+                    if return_book_input == "1":
+                        show_borrowed_book(login_member_id)
+                        print("\n========== Return a Book ==========")
 
+                        return_book_id = input("Enter book ID: ")
+                        date_now = datetime.datetime.now().date()
+                        due_return_date = get_due_return(login_member_id, return_book_id)
+
+                        days_difference = (date_now - due_return_date).days
+
+                        if days_difference >= 10:
+                            lateness_tax = 50000
+                        elif days_difference > 0:
+                            lateness_tax = days_difference * 5000
+                        else:
+                            lateness_tax = 0
+
+                        data = mysql.connector.connect(user='root', database='library_team')
+                        cursor = data.cursor()
+
+                        query = (
+                            f"UPDATE loan "
+                            f"SET return_date = '{date_now}', lateness_tax = '{lateness_tax}' "
+                            f"WHERE member_id = '{login_member_id}' AND book_id = '{return_book_id}'"
+                        )
+
+                        cursor.execute(query)
+
+                        data.commit()
+                        cursor.close()
+                        data.close()
+
+                        print("\n========== Book returned successfully ==========")
+                        print(f"========== Due return date: {due_return_date} =========")
+                        print(f"========== Book return date: {date_now} =========")
+                        print(f"========== Lateness Tax: Rp{lateness_tax} =========")
+
+                    elif return_book_input == "2":
+                        print("\n=========== Return book Canceled ============")
+                        run_return_book = False
+
+                    elif return_book_input == "3":
+                        print("Logging out...")
+                        run_return_book = False
+                        run_member = False
+
+            # display borrowed book logic
             elif member_input == "3":
                 show_borrowed_book(login_member_id)
 
+            # logout logic
             elif member_input == "4":
                 print("Logging out...")
                 run_member = False
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # admin login logic
     elif main_input == "2":
