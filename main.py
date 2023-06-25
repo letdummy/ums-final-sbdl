@@ -27,6 +27,45 @@ def show_all_member():
     data.close()
 
 
+def filter_input_author(user_input):
+    str(user_input)
+    if user_input == "1" or user_input == "01":
+        return "01"
+    elif user_input == "2" or user_input == "02":
+        return "02"
+    elif user_input == "3" or user_input == "03":
+        return "03"
+    elif user_input == "4" or user_input == "04":
+        return "04"
+    elif user_input == "5" or user_input == "05":
+        return "05"
+    else:
+        raise ValueError("Invalid input: Please input a number between 1-5")
+
+
+def filter_input_book(user_input):
+    str(user_input)
+    if user_input == "1" or user_input == "01":
+        return "01"
+    elif user_input == "2" or user_input == "02":
+        return "02"
+    elif user_input == "3" or user_input == "03":
+        return "03"
+    elif user_input == "4" or user_input == "04":
+        return "04"
+    elif user_input == "5" or user_input == "05":
+        return "05"
+    elif user_input == "6" or user_input == "06":
+        return "06"
+    elif user_input == "7" or user_input == "07":
+        return "07"
+    elif user_input == "8" or user_input == "08":
+        return "08"
+    elif user_input == "9" or user_input == "09":
+        return "09"
+    else:
+        return user_input
+
 # member menu
 def login_member(user_input):
     print("\n================================= Library UMS ================================\n")
@@ -38,7 +77,7 @@ def login_member(user_input):
     cursor.execute(query)
 
     for (member_name) in cursor:
-        return(member_name[0])
+        return (member_name[0])
 
     cursor.close()
     data.close()
@@ -166,8 +205,10 @@ def remove_book(user_input):
     cursor = data.cursor()
 
     query = (f"DELETE FROM book WHERE book_id = '{user_input}'")
-
     cursor.execute(query)
+
+    query2 = (f"DELETE FROM author_write_book WHERE book_id = '{user_input}'")
+    cursor.execute(query2)
 
     data.commit()
     cursor.close()
@@ -184,12 +225,12 @@ def show_all_book(user_input=0):
              "FROM book "
              "JOIN author_write_book ON book.book_id = author_write_book.book_id "
              "JOIN author ON author_write_book.author_id = author.author_id "
+             "LEFT JOIN loan ON book.book_id = loan.book_id "
              "WHERE book.book_id NOT IN ("
              "    SELECT loan.book_id "
              "    FROM loan "
-             f"    WHERE loan.member_id = {user_input}"
-             ") "
-             "ORDER BY book.book_id")
+             f"   WHERE loan.member_id = {user_input} AND return_date IS NULL)"
+             "GROUP BY book.book_id ORDER BY book.book_id")
 
     cursor.execute(query)
 
@@ -199,6 +240,7 @@ def show_all_book(user_input=0):
 
     cursor.close()
     data.close()
+
 
 def get_due_return(member_id, book_id):
     data = mysql.connector.connect(user="root", database="library_team")
@@ -215,8 +257,6 @@ def get_due_return(member_id, book_id):
 
     cursor.close()
     data.close()
-
-
 
 
 # Main Program
@@ -238,7 +278,7 @@ while run_program:
     if main_input == "1":
         show_all_member()
         print()
-        login_member_id = input("Enter your ID: ")
+        login_member_id = filter_input_author(input("Enter your ID: "))
         if login_member_id == "99":
             print("You are now in main menu")
             run_member = False
@@ -263,7 +303,7 @@ while run_program:
                         show_all_book(login_member_id)
                         print("\n========== Borrow a Book ==========")
 
-                        borrow_book_id = input("Enter book ID: ")
+                        borrow_book_id = filter_input_book(input("Enter book ID: "))
 
                         date_book_borrowed = datetime.datetime.now().strftime("%Y-%m-%d")
                         due_return_date = (datetime.datetime.now() + datetime.timedelta(days=7)).strftime("%Y-%m-%d")
@@ -301,7 +341,7 @@ while run_program:
                         show_borrowed_book(login_member_id)
                         print("\n========== Return a Book ==========")
 
-                        return_book_id = input("Enter book ID: ")
+                        return_book_id = filter_input_book(input("Enter book ID: "))
                         date_now = datetime.datetime.now().date()
                         due_return_date = get_due_return(login_member_id, return_book_id)
 
@@ -365,10 +405,10 @@ while run_program:
                 add_book_input = input("Enter your choice: ")
 
                 if add_book_input == "1":
-                    new_book_id = input("Enter book id: ")
+                    new_book_id = filter_input_book(input("Enter book id: "))
                     new_book_title = input("Enter book title: ")
                     show_author_db()
-                    new_book_author = input("Enter book's author: ")
+                    new_book_author = filter_input_author(input("Enter book's author: "))
                     data = mysql.connector.connect(user='root', database='library_team')
                     cursor = data.cursor()
 
@@ -403,10 +443,10 @@ while run_program:
 
                 if remove_book_input == "1":
                     show_author_db()
-                    remove_author_book = input("Which author you wish to remove the book from: ")
+                    remove_author_book = filter_input_author(input("Which author you wish to remove the book from: "))
                     show_author_book(remove_author_book)
 
-                    remove_book_id = input("Which book from chosen author you wish to remove: ")
+                    remove_book_id = filter_input_book(input("Which book from chosen author you wish to remove: "))
                     remove_book(remove_book_id)
 
                 elif remove_book_input == "2":
