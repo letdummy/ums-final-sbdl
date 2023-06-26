@@ -153,7 +153,7 @@ def show_borrowed_book(user_input):
 
     query = ("SELECT book.book_id, book.book_title "
              "FROM book "
-             "LEFT JOIN loan ON book.book_id = loan.book_id "
+             "RIGHT JOIN loan ON book.book_id = loan.book_id "
              f"WHERE member_id = '{user_input}' AND return_date IS NULL ORDER BY book_id")
 
     cursor.execute(query)
@@ -243,6 +243,21 @@ def show_all_book(user_input=0):
     cursor.close()
     data.close()
 
+def show_latest_book():
+    data = mysql.connector.connect(user="root", database="library_team")
+    cursor = data.cursor()
+
+    query = ("SELECT * "
+             "FROM (SELECT * FROM book ORDER BY book_id DESC LIMIT 5) "
+             "AS subquery ORDER BY book_id ASC")
+    cursor.execute(query)
+
+    print("\n========= Latest Book list =========")
+    for (book_id, book_title) in cursor:
+        print(f"{book_id}. {book_title}")
+    print()
+    cursor.close()
+    data.close()
 
 def get_due_return(member_id, book_id):
     data = mysql.connector.connect(user="root", database="library_team")
@@ -408,6 +423,7 @@ while run_program:
                 add_book_input = input("Enter your choice: ")
 
                 if add_book_input == "1":
+                    show_latest_book()
                     new_book_id = filter_input_book(input("Enter book id: "))
                     new_book_title = input("Enter book title: ")
                     show_author_db()
