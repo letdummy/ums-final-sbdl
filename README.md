@@ -37,13 +37,16 @@
 ## 🏷️ Usage
 
 1. Clone this repository to your local machine or download the source code.
-2. Open a terminal/command prompt and navigate to the project directory.
-3. Run the following command to start the application:
-
+2. import the library_team database to your local, name the database exacly same with the sql file (library_team) or you can change the source code.
+3. Open a terminal/command prompt and navigate to the project directory.
+4. make sure you already run apache and mysql in XAMPP.
+5. Run the following command to start the application:
    ```bash
    python main.py
    ``` 
-5. Follow the on-screen instructions to navigate through the menu and use the available options.
+6. Follow the on-screen instructions to navigate through the menu and use the available options.
+
+<a><img src="https://raw.githubusercontent.com/letdummy/ums-final-sbdl/main/usage.png" alt="image"></a>
 
 <br>
 Enjoy managing books and user accounts in a library with ease using this interactive CLI application, Library UMS!
