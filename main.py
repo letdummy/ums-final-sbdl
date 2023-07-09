@@ -1,6 +1,7 @@
 # import
 import mysql.connector
 import datetime
+import sys
 
 
 # mainMenu
@@ -487,8 +488,11 @@ while run_program:
     elif main_input == "3":
         print("Exiting program...")
         run_program = False
+        sys.exit()
 
     # invalid input logic
     else:
         print("Invalid Input, exiting program...")
         run_program = False
+        sys.exit()
+
